@@ -1,0 +1,36 @@
+body {
+  margin-left: 30px;
+  background-color: rgba(230, 224, 227, 0.7960784314);
+}
+
+.comment {
+  display: flex;
+  font-size: 64px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: baseline;
+}
+
+.like-button {
+  margin-left: 50px;
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  margin-right: 20px;
+}
+
+#new-comment {
+  margin-top: 35px;
+  border-radius: 1px;
+  border-color: #e4d2de;
+  width: 900px;
+  height: 50px;
+  font-size: 32px;
+  background-color: #d7e0e0;
+}
+
+#add-comment {
+  margin-top: 35px;
+  height: 50px;
+  font-size: 32px;
+}/*# sourceMappingURL=style.css.map */
