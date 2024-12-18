@@ -8,7 +8,7 @@ export function addCommentClickListeners() {
                 const commentId = parseInt(commentElement.dataset.commentId)
                 if (commentId >= 0 && commentId < commentsData.length) {
                     const commentText = commentsData[commentId].text
-                    const author = 'Автор'
+                    const author = commentsData[commentId].author
                     document.getElementById('new-comment').value =
                         `> ${commentText} (${author})\n`
                     event.stopPropagation()

@@ -1,21 +1,88 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Counter</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Counter</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+        />
+        <link rel="stylesheet" href="style2.css" />
+    </head>
 
-<div id="comments-container"></div>
-<input type="text" id="new-comment" placeholder="Введите новый комментарий">
-<button id="add-comment">Добавить комментарий</button>
-
-
-<script type="module" src="index.js">
- 
-    </script>
-</body>
+    <body>
+        <div class="container">
+            <ul id="comments-container" class="comments">
+                <li class="comment">
+                    <div class="comment-header">
+                        <div>NATKN</div>
+                        <div>12.02.24 17:18</div>
+                    </div>
+                    <div class="comment-body">
+                        <div class="comment-text">Cool saler there!!!!</div>
+                    </div>
+                    <div class="comment-footer">
+                        <div class="likes">
+                            <span class="likes-counter">3</span>
+                            <button class="like-button"></button>
+                        </div>
+                    </div>
+                </li>
+                <li class="comment">
+                    <div class="comment-header">
+                        <div>David</div>
+                        <div>13.12.24 19:22</div>
+                    </div>
+                    <div class="comment-body">
+                        <div class="comment-text">
+                            What a diversity of products!!!!
+                        </div>
+                    </div>
+                    <div class="comment-footer">
+                        <div class="likes">
+                            <span class="likes-counter">75</span>
+                            <button class="like-button -active-like"></button>
+                        </div>
+                    </div>
+                </li>
+                <li class="comment">
+                    <div class="comment-header">
+                        <div>Henry Lime</div>
+                        <div>01.12.24 12:02</div>
+                    </div>
+                    <div class="comment-body">
+                        <div class="comment-text">I like this site *-*</div>
+                    </div>
+                    <div class="comment-footer">
+                        <div class="likes">
+                            <span class="likes-counter">15</span>
+                            <button class="like-button"></button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div class="add-form">
+                <input
+                    type="text"
+                    class="add-form-name"
+                    id="new-comment-name"
+                    placeholder="Введите ваше имя"
+                />
+                <textarea
+                    type="textarea"
+                    class="add-form-text"
+                    id="new-comment"
+                    placeholder="Введите ваш коментарий"
+                    rows="4"
+                ></textarea>
+                <div class="add-form-row">
+                    <button id="add-comment" class="add-form-button">
+                        Написать
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script type="module" src="java4.js"></script>
+    </body>
 </html>

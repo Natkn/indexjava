@@ -8,7 +8,6 @@ export function addLikeEventListeners() {
         button.addEventListener('click', handleLikeClick)
     })
 }
-
 export function handleLikeClick(event) {
     const commentId = parseInt(event.target.dataset.commentId)
     commentsData[commentId].liked = !commentsData[commentId].liked
