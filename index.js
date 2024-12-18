@@ -18,3 +18,5 @@ document.getElementById('add-comment').addEventListener('click', () => {
         renderComments()
     }
 })
+
+renderComments()

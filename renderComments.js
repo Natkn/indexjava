@@ -1,6 +1,5 @@
 import { commentsData } from './comments.js'
 import { addLikeEventListeners } from './initList.js'
-
 import { addCommentClickListeners } from './newComm.js'
 
 export function renderComments() {

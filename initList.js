@@ -1,5 +1,4 @@
 import { renderComments } from './renderComments.js'
-
 import { commentsData } from './comments.js'
 
 export function addLikeEventListeners() {
