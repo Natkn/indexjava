@@ -1,7 +1,6 @@
 import { renderComments } from './renderComments.js'
 import { commentsData } from './comments.js'
-
-renderComments()
+import { updateTasks } from './comments.js'
 
 document.getElementById('add-comment').addEventListener('click', () => {
     const newCommentText = document.getElementById('new-comment').value
@@ -19,4 +18,27 @@ document.getElementById('add-comment').addEventListener('click', () => {
     }
 })
 
-renderComments()
+const newTask = {
+    text: input.value.replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
+}
+
+fetch('https://wedev-api.sky.pro/api/todos')
+    .then((response) => {
+        return response.json()
+    })
+    .then((data) => {
+        updateTasks(data.todos)
+        renderComments()
+    })
+
+fetch('https://wedev-api.sky.pro/api/todos', {
+    method: 'POST',
+    body: JSON.stringify(newTask),
+})
+    .then((response) => {
+        return response.json()
+    })
+    .then((data) => {
+        updateTasks(data.todos)
+        renderComments()
+    })
