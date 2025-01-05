@@ -1,67 +1,62 @@
 import { commentsData } from './comments.js'
-import { addLikeEventListeners } from './initList.js'
-import { addCommentClickListeners } from './newComm.js'
 
 export function renderComments() {
     const commentsContainer = document.getElementById('comments-container')
     commentsContainer.innerHTML = ''
+
     commentsData.forEach((comment, index) => {
-        const commentDiv = document.createElement('li')
-        commentDiv.dataset.commentId = index
-        commentDiv.classList.add('comment')
+        const dateString = comment.date
+            ? comment.date
+            : `${new Date().getDate()}.${
+                  new Date().getMonth() + 1
+              }.${new Date().getFullYear()} ${new Date().getHours()}:${new Date().getMinutes()}`
 
-        const commentHeader = document.createElement('div')
-        commentHeader.classList.add('comment-header')
-        const authorDiv = document.createElement('div')
-        authorDiv.textContent = comment.author
-        commentHeader.appendChild(authorDiv)
-
-        const dateDiv = document.createElement('div')
-        if (comment.date) {
-            dateDiv.textContent = comment.date
-        } else {
-            const now = new Date()
-            const dateString = `${now.getDate()}.${
-                now.getMonth() + 1
-            }.${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`
-            dateDiv.textContent = dateString
-        }
-        commentHeader.appendChild(dateDiv)
-        commentDiv.appendChild(commentHeader)
-
-        const commentBody = document.createElement('div')
-        commentBody.classList.add('comment-body')
-        const p = document.createElement('div')
-        p.classList.add('comment-text')
-        p.textContent = comment.text
-        commentBody.appendChild(p)
-        commentDiv.appendChild(commentBody)
-
-        const commentFooter = document.createElement('div')
-        commentFooter.classList.add('comment-footer')
-        const likesDiv = document.createElement('div')
-        likesDiv.classList.add('likes')
-
-        const likeCount = document.createElement('span')
-        likeCount.classList.add('likes-counter')
-        likeCount.textContent = comment.likesCount
-        likesDiv.appendChild(likeCount)
-
-        const likeButton = document.createElement('button')
-        likeButton.classList.add('like-button')
-        if (comment.liked) {
-            likeButton.classList.add('liked')
-        }
-        likeButton.dataset.commentId = index
-
-        likesDiv.appendChild(likeButton)
-        commentFooter.appendChild(likesDiv)
-
-        commentDiv.appendChild(commentFooter)
-        commentsContainer.appendChild(commentDiv)
+        const commentHTML = `
+            <li class="comment" data-comment-id="${index}">
+                <div class="comment-header">
+                    <div>${comment.author}</div>
+                    <div>${dateString}</div>
+                </div>
+                <div class="comment-body">
+                    <div class="comment-text" data-edit-comment-id="${index}">${comment.text}</div>
+                </div>
+                <div class="comment-footer">
+                    <div class="likes">
+                        <span class="likes-counter">${comment.likesCount}</span>
+                        <button class="like-button ${
+                            comment.liked ? 'liked' : ''
+                        }" data-comment-id="${index}"></button>
+                    </div>
+                </div>
+            </li>
+        `
+        commentsContainer.innerHTML += commentHTML
     })
-
     addLikeEventListeners()
-
     addCommentClickListeners()
+}
+
+function addLikeEventListeners() {
+    const likeButtons = document.querySelectorAll('.like-button')
+    likeButtons.forEach((likeButton) => {
+        likeButton.addEventListener('click', () => {
+            const commentId = parseInt(likeButton.dataset.commentId)
+            if (commentsData[commentId].liked === true) {
+                commentsData[commentId].liked = false
+                commentsData[commentId].likesCount -= 1
+                renderComments()
+            } else {
+                commentsData[commentId].liked = true
+                commentsData[commentId].likesCount += 1
+                renderComments()
+            }
+        })
+    })
+}
+
+function addCommentClickListeners() {
+    const commentTexts = document.querySelectorAll('.comment-text')
+    commentTexts.forEach((commentTextElement) => {
+        commentTextElement.addEventListener('click', () => {})
+    })
 }

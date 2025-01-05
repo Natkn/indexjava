@@ -1,8 +1,8 @@
 export let commentsData = []
 export const commentsContainer = document.getElementById('comments-container')
 
-export function updateTasks(todo) {
-    commentsData.push(todo)
+export function updateTasks(newTasks) {
+    commentsData = newTasks
 }
 
 export function getInitialComments() {
