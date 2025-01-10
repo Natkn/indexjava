@@ -1,5 +1,10 @@
 import { commentsData } from './comments.js'
 
+function delay(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+    })
+}
 export function renderComments() {
     const commentsContainer = document.getElementById('comments-container')
     commentsContainer.innerHTML = ''
@@ -41,15 +46,22 @@ function addLikeEventListeners() {
     likeButtons.forEach((likeButton) => {
         likeButton.addEventListener('click', () => {
             const commentId = parseInt(likeButton.dataset.commentId)
-            if (commentsData[commentId].liked === true) {
-                commentsData[commentId].liked = false
-                commentsData[commentId].likesCount -= 1
-                renderComments()
-            } else {
-                commentsData[commentId].liked = true
-                commentsData[commentId].likesCount += 1
-                renderComments()
-            }
+            likeButton.classList.add('loading-like')
+
+            delay(2000)
+                .then(() => {
+                    if (commentsData[commentId].liked === true) {
+                        commentsData[commentId].liked = false
+                        commentsData[commentId].likesCount -= 1
+                    } else {
+                        commentsData[commentId].liked = true
+                        commentsData[commentId].likesCount += 1
+                    }
+                    renderComments()
+                })
+                .finally(() => {
+                    likeButton.classList.remove('loading-like')
+                })
         })
     })
 }

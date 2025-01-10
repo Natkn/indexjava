@@ -1,9 +1,14 @@
-import { renderComments } from './renderComments.js'
-import { updateTasks } from './comments.js'
+import { fetchAndRenderComments } from './fetchAndRenderComments.js'
 
-const button = document.getElementById('add-comment')
+export const button = document.getElementById('add-comment')
 const input = document.getElementById('new-comment-name')
 const newCommentInput = document.getElementById('new-comment')
+export const commentsContainer = document.getElementById('comments-container')
+const commentForm = document.getElementById('comment-form')
+const commentLoadingMessage = document.getElementById('comment-loading-message')
+
+export let isCommentLoading = false
+fetchAndRenderComments()
 
 button.addEventListener('click', () => {
     const newCommentText = newCommentInput.value
@@ -16,55 +21,37 @@ button.addEventListener('click', () => {
     }
 
     if (newCommentText.trim() !== '' && newCommentAuthor.trim() !== '') {
+        isCommentLoading = true
+        commentForm.style.display = 'none'
+        commentLoadingMessage.style.display = 'block'
         const newTask = {
-            // newTask создается внутри слушателя
             text: newCommentText
                 .replaceAll('<', '&lt;')
                 .replaceAll('>', '&gt;'),
             author: newCommentAuthor,
         }
 
+        button.disabled = true
+        button.textContent = 'Загружаем...'
+
         fetch('https://wedev-api.sky.pro/api/todos', {
-            // fetch POST внутри слушателя
             method: 'POST',
             body: JSON.stringify(newTask),
         })
-            .then((response) => {
-                return response.json()
+            .then(() => {
+                return fetchAndRenderComments()
             })
-            .then((data) => {
-                if (data) {
-                    fetchAndRenderComments()
-                    newCommentInput.value = ''
-                    input.value = ''
-                }
+            .then(() => {
+                newCommentInput.value = ''
+                input.value = ''
             })
             .catch((error) => {
                 console.error('Ошибка при отправке комментария:', error)
             })
+            .finally(() => {
+                isCommentLoading = false
+                commentForm.style.display = 'flex'
+                commentLoadingMessage.style.display = 'none'
+            })
     }
 })
-function fetchAndRenderComments() {
-    fetch('https://wedev-api.sky.pro/api/todos')
-        .then((response) => {
-            return response.json()
-        })
-        .then((data) => {
-            if (data && data.todos) {
-                updateTasks(
-                    data.todos.map((todo) => ({
-                        id: todo.id,
-                        author: todo.author || 'User',
-                        text: todo.text,
-                        liked: false,
-                        likesCount: 0,
-                    })),
-                )
-                renderComments()
-            }
-        })
-        .catch((error) => {
-            console.error('Ошибка при загрузке комментариев:', error)
-        })
-}
-fetchAndRenderComments()
