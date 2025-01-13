@@ -1,9 +1,9 @@
 import { renderComments } from './renderComments.js'
 import { updateTasks } from './comments.js'
-import { button } from './index.js'
 import { commentsContainer } from './index.js'
 
 let isInitialLoading = true
+
 export function fetchAndRenderComments() {
     if (isInitialLoading) {
         commentsContainer.innerHTML = 'Подождите, комментарии загружаются...'
@@ -23,13 +23,11 @@ export function fetchAndRenderComments() {
                         likesCount: 0,
                     })),
                 )
-                button.disabled = false
-                button.textContent = 'Написать'
                 renderComments()
                 isInitialLoading = false
             }
         })
         .catch((error) => {
-            console.error('Ошибка при загрузке комментариев:', error)
+            console.error('Ошибка при загрузке комментариев', error)
         })
 }

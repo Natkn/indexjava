@@ -157,3 +157,19 @@ body {
 .add-form-button:hover {
     opacity: 0.9;
 }
+
+.hidden {
+    display: none;
+}
+
+.hidden.visible {
+    display: flex;
+}
+
+.comment-form.hidden {
+    display: none;
+}
+
+.comment-form {
+    display: flex;
+}

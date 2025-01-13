@@ -5,6 +5,7 @@ function delay(ms) {
         setTimeout(resolve, ms)
     })
 }
+
 export function renderComments() {
     const commentsContainer = document.getElementById('comments-container')
     commentsContainer.innerHTML = ''
