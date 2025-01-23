@@ -173,3 +173,56 @@ body {
 .comment-form {
     display: flex;
 }
+
+#registration-form {
+    display: flex;
+    position: fixed;
+    top: 30%;
+    left: 22%;
+    width: 56%;
+    height: 60%;
+    background-color: rgba(185, 123, 227, 0.733);
+    z-index: 1000;
+    overflow: auto;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+.registration-form-wrapper {
+    background-color: rgba(185, 123, 227, 0.733);
+    z-index: 1000;
+    position: fixed;
+    width: 60%;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+.close-button {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    color: #080707;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2000;
+}
+
+.registration-form-wrapper .close-button:hover,
+.registration-form-wrapper .close-button:focus {
+    color: #d6c9c9;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@keyframes animatetop {
+    from {
+        top: -200px;
+        opacity: 0;
+    }
+    to {
+        top: 0;
+        opacity: 1;
+    }
+}

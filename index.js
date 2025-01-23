@@ -1,5 +1,6 @@
+import { postTodo } from './api.js'
 import { fetchAndRenderComments } from './fetchAndRenderComments.js'
-
+//const token = 'asb4c4boc86gasb4c4boc86g37w3cc3bo3b83k4g37k3bk3cg3c03ck4k'
 const input = document.getElementById('new-comment-name')
 const newCommentInput = document.getElementById('new-comment')
 const commentLoadingMessage = document.getElementById('comment-loading-message')
@@ -7,7 +8,12 @@ const formContainer = document.getElementById('comment-form')
 export const commentsContainer = document.getElementById('comments-container')
 export const button = document.getElementById('add-comment')
 export let isCommentLoading = false
+export let savedAuthor = ''
 fetchAndRenderComments()
+
+input.addEventListener('input', (e) => {
+    savedAuthor = e.target.value
+})
 
 function validateInput(author, text) {
     if (author.trim() === '') {
@@ -20,7 +26,8 @@ function validateInput(author, text) {
     }
     return true
 }
-button.addEventListener('click', () => {
+button.addEventListener('click', (e) => {
+    e.preventDefault()
     const newCommentText = newCommentInput.value
     const newCommentAuthor = input.value
 
@@ -31,18 +38,17 @@ button.addEventListener('click', () => {
     isCommentLoading = true
     commentLoadingMessage.classList.add('visible')
     formContainer.classList.add('hidden')
+
     const newTask = {
         text: newCommentText.replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
         author: newCommentAuthor,
+        forceError: true,
     }
 
     button.disabled = true
     button.textContent = 'Загружаем...'
 
-    fetch('https://wedev-api.sky.pro/api/todos', {
-        method: 'POST',
-        body: JSON.stringify(newTask),
-    })
+    postTodo(newTask)
         .then((response) => {
             if (response.status === 201) {
                 return response.json()
@@ -63,6 +69,7 @@ button.addEventListener('click', () => {
         .then(() => {
             newCommentInput.value = ''
             input.value = ''
+            savedAuthor = ''
         })
         .catch((error) => {
             alert('Кажется, у вас сломался интернет, попробуйте позже', error)

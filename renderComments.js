@@ -1,4 +1,7 @@
 import { commentsData } from './comments.js'
+import { savedAuthor } from './index.js'
+import { fetchAndRenderComments } from './fetchAndRenderComments.js'
+const addCommentButton = document.getElementById('add-comment')
 
 function delay(ms) {
     return new Promise((resolve) => {
@@ -20,7 +23,7 @@ export function renderComments() {
         const commentHTML = `
             <li class="comment" data-comment-id="${index}">
                 <div class="comment-header">
-                    <div>${comment.author}</div>
+                    <div>${savedAuthor ? savedAuthor : ''}</div>
                     <div>${dateString}</div>
                 </div>
                 <div class="comment-body">
@@ -73,3 +76,89 @@ function addCommentClickListeners() {
         commentTextElement.addEventListener('click', () => {})
     })
 }
+
+function showRegistrationForm() {
+    const app = document.getElementById('app')
+    const registrationModal = document.createElement('div')
+    registrationModal.id = 'registration-form'
+    registrationModal.className = 'registration-form-wrapper'
+
+    registrationModal.innerHTML = `
+        <div id="registration-form">
+            <h1>Страница входа</h1>
+            <div class="form">
+                <h3 class="form-title">Фopмa вxодa</h3>
+                <div class="form-row">
+                    <input type="text" id="login-input" class="input" placeholder="Login">
+                    <input type="password" id="password-input" class="input" placeholder="Пароль">
+                </div>
+                <br />
+                <button class="button" id="login-button">Войти</button>
+                <button class="button" id="reg-button">Зарегистрироваться</button>
+            </div>
+        </div> 
+        `
+    app.appendChild(registrationModal)
+    const loginButton = document.getElementById('login-button')
+    const regButton = document.getElementById('reg-button')
+
+    loginButton.addEventListener('click', async () => {
+        const login = document.getElementById('login-input').value
+        const password = document.getElementById('password-input').value
+
+        try {
+            const response = await fetch('https://wedev-api.sky.pro/api/user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password }),
+            })
+
+            if (!response.ok) {
+                throw new Error('Ошибка авторизации')
+            }
+
+            await fetchAndRenderComments()
+
+            registrationModal.remove()
+        } catch (error) {
+            alert('Ошибка: ' + error.message)
+        }
+    })
+
+    regButton.addEventListener('click', async () => {
+        const login = document.getElementById('login-input').value
+        const password = document.getElementById('password-input').value
+
+        try {
+            const response = await fetch('https://wedev-api.sky.pro/api/user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password }),
+            })
+
+            if (!response.ok) {
+                throw new Error('Ошибка регистрации')
+            }
+
+            await fetchAndRenderComments()
+
+            registrationModal.remove()
+        } catch (error) {
+            alert('Ошибка: ' + error.message)
+        }
+    })
+
+    const closeButton = document.createElement('span')
+    closeButton.className = 'close-button'
+    closeButton.innerHTML = '&times;'
+
+    registrationModal.appendChild(closeButton)
+
+    closeButton.addEventListener('click', () => {
+        registrationModal.remove()
+    })
+}
+
+addCommentButton.addEventListener('click', () => {
+    showRegistrationForm()
+})
