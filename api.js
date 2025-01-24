@@ -17,22 +17,12 @@ export function getTodos() {
         return response.json()
     })
 }
-export function deleteTodo({ id }) {
-    return fetch(`${host}/${id}`, {
-        method: 'DELETE',
-        headers: {
-            Authorization: ` Bearer ${token}`,
-        },
-    }).then((response) => {
-        return response.json()
-    })
-}
 
 export function postTodo({ text }) {
     return fetch(host, {
         method: 'POST',
         headers: {
-            Authorization: ` Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
             text,
@@ -54,13 +44,13 @@ export function login({ login, password }) {
     })
 }
 
-export function registration({ login, name, password }) {
+export function registration({ login, password }) {
     return fetch(authToken, {
         method: 'POST',
         body: JSON.stringify({
             login,
-            name,
             password,
+            name: login,
         }),
     }).then((response) => {
         return response.json()

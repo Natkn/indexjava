@@ -176,7 +176,7 @@ body {
   left: 22%;
   width: 56%;
   height: 60%;
-  background-color: rgba(185, 123, 227, 0.733);
+  background-color: rgba(129, 74, 231, 0.7098039216);
   z-index: 1000;
   overflow: auto;
   justify-content: center;
@@ -187,7 +187,7 @@ body {
 }
 
 .registration-form-wrapper {
-  background-color: rgba(185, 123, 227, 0.733);
+  background-color: rgba(129, 74, 231, 0.7098039216);
   z-index: 1000;
   position: fixed;
   width: 60%;

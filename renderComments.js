@@ -1,6 +1,9 @@
 import { commentsData } from './comments.js'
 import { savedAuthor } from './index.js'
-import { fetchAndRenderComments } from './fetchAndRenderComments.js'
+import { token } from './api.js'
+import { login, registration, updateToken } from './api.js'
+const input = document.getElementById('new-comment-name')
+const newCommentInput = document.getElementById('new-comment')
 const addCommentButton = document.getElementById('add-comment')
 
 function delay(ms) {
@@ -103,48 +106,48 @@ function showRegistrationForm() {
     const regButton = document.getElementById('reg-button')
 
     loginButton.addEventListener('click', async () => {
-        const login = document.getElementById('login-input').value
-        const password = document.getElementById('password-input').value
+        const loginValue = document.getElementById('login-input').value
+        const passwordValue = document.getElementById('password-input').value
 
         try {
-            const response = await fetch('https://wedev-api.sky.pro/api/user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ login, password }),
+            const data = await login({
+                login: loginValue,
+                password: passwordValue,
             })
 
-            if (!response.ok) {
-                throw new Error('Ошибка авторизации')
+            if (data.error) {
+                throw new Error(data.error)
             }
+            updateToken(data.token)
+            alert('Вход выполнен')
 
             await fetchAndRenderComments()
-
             registrationModal.remove()
         } catch (error) {
-            alert('Ошибка: ' + error.message)
+            alert('Ошибка входа: ' + error.message)
         }
     })
 
     regButton.addEventListener('click', async () => {
-        const login = document.getElementById('login-input').value
-        const password = document.getElementById('password-input').value
+        const loginValue = document.getElementById('login-input').value
+        const passwordValue = document.getElementById('password-input').value
 
         try {
-            const response = await fetch('https://wedev-api.sky.pro/api/user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ login, password }),
+            const data = await registration({
+                login: loginValue,
+                password: passwordValue,
             })
 
-            if (!response.ok) {
-                throw new Error('Ошибка регистрации')
+            if (data.error) {
+                throw new Error(data.error)
             }
+            updateToken(data.token)
+            alert('Регистрация прошла')
 
             await fetchAndRenderComments()
-
             registrationModal.remove()
         } catch (error) {
-            alert('Ошибка: ' + error.message)
+            alert('Ошибка регистрации: ' + error.message)
         }
     })
 
@@ -157,6 +160,36 @@ function showRegistrationForm() {
     closeButton.addEventListener('click', () => {
         registrationModal.remove()
     })
+
+    async function fetchAndRenderComments() {
+        const newCommentText = newCommentInput.value
+        const newCommentAuthor = input.value
+        const newTask = {
+            text: newCommentText
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;'),
+            author: newCommentAuthor,
+        }
+
+        try {
+            const response = fetch('https://wedev-api.sky.pro/api/v2/todos', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(newTask),
+            })
+
+            if (!response.ok) {
+                throw new Error('Ошибка при отправке комментария')
+            }
+            await fetchAndRenderComments()
+            newCommentInput.value = ''
+            input.value = ''
+        } catch (error) {
+            alert('Ошибка: ' + error.message)
+        }
+    }
 }
 
 addCommentButton.addEventListener('click', () => {
