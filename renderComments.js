@@ -1,8 +1,9 @@
 import { commentsData } from './comments.js'
 import { savedAuthor } from './index.js'
-import { token } from './api.js'
+import { fetchAndRenderComments } from './fetchAndRenderComments.js'
 import { login, registration, updateToken } from './api.js'
 const input = document.getElementById('new-comment-name')
+
 const newCommentInput = document.getElementById('new-comment')
 const addCommentButton = document.getElementById('add-comment')
 
@@ -79,7 +80,18 @@ function addCommentClickListeners() {
         commentTextElement.addEventListener('click', () => {})
     })
 }
-
+async function sendComment() {
+    try {
+        const data = await fetchAndRenderComments()
+        if (data) {
+            renderComments(data.todos)
+        }
+        newCommentInput.value = ''
+        input.value = ''
+    } catch (error) {
+        alert('Ошибка: ' + error.message)
+    }
+}
 function showRegistrationForm() {
     const app = document.getElementById('app')
     const registrationModal = document.createElement('div')
@@ -101,6 +113,14 @@ function showRegistrationForm() {
             </div>
         </div> 
         `
+    const closeButton = document.createElement('span')
+    closeButton.className = 'close-button'
+    closeButton.innerHTML = '&times;'
+    registrationModal.appendChild(closeButton)
+
+    closeButton.addEventListener('click', () => {
+        registrationModal.remove()
+    })
     app.appendChild(registrationModal)
     const loginButton = document.getElementById('login-button')
     const regButton = document.getElementById('reg-button')
@@ -119,12 +139,12 @@ function showRegistrationForm() {
                 throw new Error(data.error)
             }
             updateToken(data.token)
-            alert('Вход выполнен')
 
-            await fetchAndRenderComments()
+            await sendComment()
             registrationModal.remove()
         } catch (error) {
             alert('Ошибка входа: ' + error.message)
+            registrationModal.remove()
         }
     })
 
@@ -142,54 +162,14 @@ function showRegistrationForm() {
                 throw new Error(data.error)
             }
             updateToken(data.token)
-            alert('Регистрация прошла')
-
-            await fetchAndRenderComments()
+            await sendComment()
             registrationModal.remove()
         } catch (error) {
             alert('Ошибка регистрации: ' + error.message)
+            registrationModal.remove()
         }
     })
-
-    const closeButton = document.createElement('span')
-    closeButton.className = 'close-button'
-    closeButton.innerHTML = '&times;'
-
-    registrationModal.appendChild(closeButton)
-
-    closeButton.addEventListener('click', () => {
-        registrationModal.remove()
-    })
-
-    async function fetchAndRenderComments() {
-        const newCommentText = newCommentInput.value
-        const newCommentAuthor = input.value
-        const newTask = {
-            text: newCommentText
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;'),
-            author: newCommentAuthor,
-        }
-
-        try {
-            const response = fetch('https://wedev-api.sky.pro/api/v2/todos', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(newTask),
-            })
-
-            if (!response.ok) {
-                throw new Error('Ошибка при отправке комментария')
-            }
-            await fetchAndRenderComments()
-            newCommentInput.value = ''
-            input.value = ''
-        } catch (error) {
-            alert('Ошибка: ' + error.message)
-        }
-    }
+    app.appendChild(registrationModal)
 }
 
 addCommentButton.addEventListener('click', () => {

@@ -1,6 +1,7 @@
-import { postTodo } from './api.js'
+//import { postTodo } from './api.js'
 import { fetchAndRenderComments } from './fetchAndRenderComments.js'
-//const token = 'asb4c4boc86gasb4c4boc86g37w3cc3bo3b83k4g37k3bk3cg3c03ck4k'
+import { getToken } from './api.js'
+
 const input = document.getElementById('new-comment-name')
 const newCommentInput = document.getElementById('new-comment')
 const commentLoadingMessage = document.getElementById('comment-loading-message')
@@ -9,7 +10,19 @@ export const commentsContainer = document.getElementById('comments-container')
 export const button = document.getElementById('add-comment')
 export let isCommentLoading = false
 export let savedAuthor = ''
-fetchAndRenderComments()
+
+async function initializeApp() {
+    try {
+        const token = getToken()
+        if (token) {
+            await fetchAndRenderComments()
+        }
+    } catch (error) {
+        console.error('Ошибка инициализации приложения:', error)
+    }
+}
+
+initializeApp()
 
 input.addEventListener('input', (e) => {
     savedAuthor = e.target.value
@@ -26,7 +39,8 @@ function validateInput(author, text) {
     }
     return true
 }
-button.addEventListener('click', (e) => {
+
+button.addEventListener('click', async (e) => {
     e.preventDefault()
     const newCommentText = newCommentInput.value
     const newCommentAuthor = input.value
@@ -42,43 +56,23 @@ button.addEventListener('click', (e) => {
     const newTask = {
         text: newCommentText.replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
         author: newCommentAuthor,
-        forceError: true,
     }
 
     button.disabled = true
     button.textContent = 'Загружаем...'
 
-    postTodo(newTask)
-        .then((response) => {
-            if (response.status === 201) {
-                return response.json()
-            } else {
-                if (response.status === 500) {
-                    throw new Error('Сервер сломался, попробуй позже')
-                }
-                if (response.status === 400) {
-                    throw new Error(' You made mistake')
-                }
-                throw new Error(' Something went wrong')
-            }
-        })
-
-        .then(() => {
-            return fetchAndRenderComments()
-        })
-        .then(() => {
-            newCommentInput.value = ''
-            input.value = ''
-            savedAuthor = ''
-        })
-        .catch((error) => {
-            alert('Кажется, у вас сломался интернет, попробуйте позже', error)
-        })
-        .finally(() => {
-            isCommentLoading = false
-            button.disabled = false
-            button.textContent = 'Написать'
-            commentLoadingMessage.classList.remove('visible')
-            formContainer.classList.remove('hidden')
-        })
+    try {
+        await fetchAndRenderComments(newTask)
+    } catch (error) {
+        console.error('Ошибка при отправке комментария:', error)
+    } finally {
+        newCommentInput.value = ''
+        input.value = ''
+        savedAuthor = ''
+        isCommentLoading = false
+        button.disabled = false
+        button.textContent = 'Написать'
+        commentLoadingMessage.classList.remove('visible')
+        formContainer.classList.remove('hidden')
+    }
 })
