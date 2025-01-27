@@ -1,11 +1,7 @@
-import { commentsData } from './comments.js'
 import { savedAuthor } from './index.js'
 import { fetchAndRenderComments } from './fetchAndRenderComments.js'
-import { login, registration, updateToken } from './api.js'
-const input = document.getElementById('new-comment-name')
-
-const newCommentInput = document.getElementById('new-comment')
-const addCommentButton = document.getElementById('add-comment')
+import { getToken, login, registration, updateToken, postTodo } from './api.js'
+import { commentsData } from './comments.js'
 
 function delay(ms) {
     return new Promise((resolve) => {
@@ -19,7 +15,7 @@ export function renderComments() {
 
     commentsData.forEach((comment, index) => {
         const dateString = comment.date
-            ? comment.date
+            ? comment.date.slice(0, 19).replace('T', ' ')
             : `${new Date().getDate()}.${
                   new Date().getMonth() + 1
               }.${new Date().getFullYear()} ${new Date().getHours()}:${new Date().getMinutes()}`
@@ -27,7 +23,7 @@ export function renderComments() {
         const commentHTML = `
             <li class="comment" data-comment-id="${index}">
                 <div class="comment-header">
-                    <div>${savedAuthor ? savedAuthor : ''}</div>
+                    <div>${comment.author ? comment.author : ''}</div>
                     <div>${dateString}</div>
                 </div>
                 <div class="comment-body">
@@ -80,19 +76,20 @@ function addCommentClickListeners() {
         commentTextElement.addEventListener('click', () => {})
     })
 }
-async function sendComment() {
+async function sendComment(callback, newTask) {
     try {
-        const data = await fetchAndRenderComments()
-        if (data) {
-            renderComments(data.todos)
+        if (newTask) {
+            await postTodo({ ...newTask, author: savedAuthor })
         }
-        newCommentInput.value = ''
-        input.value = ''
+        await fetchAndRenderComments()
+        if (callback) {
+            return await callback()
+        }
     } catch (error) {
         alert('Ошибка: ' + error.message)
     }
 }
-function showRegistrationForm() {
+export function showRegistrationForm(callback, newTask) {
     const app = document.getElementById('app')
     const registrationModal = document.createElement('div')
     registrationModal.id = 'registration-form'
@@ -103,10 +100,12 @@ function showRegistrationForm() {
             <h1>Страница входа</h1>
             <div class="form">
                 <h3 class="form-title">Фopмa вxодa</h3>
-                <div class="form-row">
-                    <input type="text" id="login-input" class="input" placeholder="Login">
-                    <input type="password" id="password-input" class="input" placeholder="Пароль">
-                </div>
+                <form id="auth-form">
+                    <div class="form-row">
+                        <input type="text" id="login-input" class="input" placeholder="Login" autocomplete="username">
+                        <input type="password" id="password-input" class="input" placeholder="Пароль" autocomplete="current-password">
+                    </div>
+                </form>
                 <br />
                 <button class="button" id="login-button">Войти</button>
                 <button class="button" id="reg-button">Зарегистрироваться</button>
@@ -122,13 +121,18 @@ function showRegistrationForm() {
         registrationModal.remove()
     })
     app.appendChild(registrationModal)
+    const authForm = document.getElementById('auth-form')
+
+    authForm.addEventListener('submit', (event) => {
+        event.preventDefault()
+    })
     const loginButton = document.getElementById('login-button')
     const regButton = document.getElementById('reg-button')
 
     loginButton.addEventListener('click', async () => {
         const loginValue = document.getElementById('login-input').value
         const passwordValue = document.getElementById('password-input').value
-
+        registrationModal.remove()
         try {
             const data = await login({
                 login: loginValue,
@@ -138,20 +142,18 @@ function showRegistrationForm() {
             if (data.error) {
                 throw new Error(data.error)
             }
-            updateToken(data.token)
-
-            await sendComment()
-            registrationModal.remove()
+            await updateToken(data.user.token)
+            console.log('Token after await updateToken in login', getToken())
+            return await sendComment(callback, newTask)
         } catch (error) {
             alert('Ошибка входа: ' + error.message)
-            registrationModal.remove()
         }
     })
 
     regButton.addEventListener('click', async () => {
         const loginValue = document.getElementById('login-input').value
         const passwordValue = document.getElementById('password-input').value
-
+        registrationModal.remove()
         try {
             const data = await registration({
                 login: loginValue,
@@ -161,17 +163,15 @@ function showRegistrationForm() {
             if (data.error) {
                 throw new Error(data.error)
             }
-            updateToken(data.token)
-            await sendComment()
-            registrationModal.remove()
+            await updateToken(data.user.token)
+            console.log(
+                'Token after await updateToken in registration',
+                getToken(),
+            )
+            return await sendComment(callback, newTask)
         } catch (error) {
             alert('Ошибка регистрации: ' + error.message)
-            registrationModal.remove()
         }
     })
     app.appendChild(registrationModal)
 }
-
-addCommentButton.addEventListener('click', () => {
-    showRegistrationForm()
-})

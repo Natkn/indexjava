@@ -4,10 +4,19 @@ const authToken = 'https://wedev-api.sky.pro/api/user'
 
 let token = localStorage.getItem('token') || ''
 
-export const getToken = () => token
-export const updateToken = (newToken) => {
-    token = newToken
-    localStorage.setItem('token', newToken)
+export const getToken = () => {
+    console.log('Getting token:', token)
+    return token
+}
+export const updateToken = async (newToken) => {
+    return new Promise((resolve) => {
+        token = newToken
+        setTimeout(() => {
+            localStorage.setItem('token', newToken)
+            console.log('Token updated to:', newToken)
+            resolve()
+        }, 1000)
+    })
 }
 
 export function getTodos() {
@@ -31,7 +40,8 @@ export async function login({ login, password }) {
             throw new Error(errorData.message || 'Ошибка при авторизации')
         }
         const data = await response.json()
-        updateToken(data.token)
+        await updateToken(data.user.token)
+        console.log('Token after login', data.user.token)
         return data
     } catch (error) {
         console.error('Ошибка при авторизации:', error)
@@ -51,8 +61,8 @@ export async function registration({ login, password }) {
             throw new Error(errorData.message || 'Ошибка при регистрации')
         }
         const data = await response.json()
-        updateToken(data.token)
-        return data
+        await updateToken(data.user.token)
+        console.log('Token after registration', data.user.token)
     } catch (error) {
         console.error('Ошибка при регистрации:', error)
         throw error
@@ -61,14 +71,17 @@ export async function registration({ login, password }) {
 
 export async function postTodo({ text, author }) {
     const token = getToken()
-
+    console.log('Token in postTodo:', token)
+    if (!token) {
+        throw new Error('Нет авторизации')
+    }
     try {
         const response = await fetch(host, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ text: text, author }),
+            body: JSON.stringify({ text: text, author: author }),
         })
         if (!response.ok) {
             let errorMessage = 'Ошибка при отправке комментария'
@@ -82,11 +95,14 @@ export async function postTodo({ text, author }) {
             } catch (jsonError) {
                 console.error('Ошибка парсинга JSON ответа:', jsonError)
             }
-            console.error('Ошибка при отправке комментария:', errorMessage)
+            console.error(
+                'Ошибка при отправке комментария:',
+                errorMessage,
+                response,
+            )
             throw new Error(errorMessage)
         }
         const data = await response.json()
-
         return data
     } catch (error) {
         console.error('Ошибка в postTodo:', error)
@@ -113,7 +129,6 @@ export async function fetchAndRenderComments() {
             alert(errorMessage)
         }
         const data = await response.json()
-
         return data
     } catch (error) {
         console.error('Ошибка загрузки комментариев:', error)

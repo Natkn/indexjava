@@ -1,7 +1,7 @@
 //import { postTodo } from './api.js'
 import { fetchAndRenderComments } from './fetchAndRenderComments.js'
 import { getToken } from './api.js'
-
+import { showRegistrationForm } from './renderComments.js'
 const input = document.getElementById('new-comment-name')
 const newCommentInput = document.getElementById('new-comment')
 const commentLoadingMessage = document.getElementById('comment-loading-message')
@@ -10,6 +10,7 @@ export const commentsContainer = document.getElementById('comments-container')
 export const button = document.getElementById('add-comment')
 export let isCommentLoading = false
 export let savedAuthor = ''
+let tempNewComment = null
 
 async function initializeApp() {
     try {
@@ -49,30 +50,33 @@ button.addEventListener('click', async (e) => {
     if (!validateInput(newCommentAuthor, newCommentText)) {
         return
     }
-    isCommentLoading = true
-    commentLoadingMessage.classList.add('visible')
-    formContainer.classList.add('hidden')
 
-    const newTask = {
+    tempNewComment = {
         text: newCommentText.replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
         author: newCommentAuthor,
     }
-
-    button.disabled = true
-    button.textContent = 'Загружаем...'
-
+    button.disabled = false
+    button.textContent = 'Написать'
+    commentLoadingMessage.classList.add('hidden')
+    formContainer.classList.add('visible')
     try {
-        await fetchAndRenderComments(newTask)
+        await showRegistrationForm(async () => {
+            isCommentLoading = true
+            button.disabled = false
+            button.textContent = 'Написать'
+        }, tempNewComment)
+        await fetchAndRenderComments()
     } catch (error) {
         console.error('Ошибка при отправке комментария:', error)
+        alert('Кажется, у вас сломался интернет, попробуйте позже', error)
     } finally {
+        isCommentLoading = false
+
+        commentLoadingMessage.classList.remove('visible')
+        formContainer.classList.remove('hidden')
         newCommentInput.value = ''
         input.value = ''
         savedAuthor = ''
-        isCommentLoading = false
-        button.disabled = false
-        button.textContent = 'Написать'
-        commentLoadingMessage.classList.remove('visible')
-        formContainer.classList.remove('hidden')
+        tempNewComment = null
     }
 })
