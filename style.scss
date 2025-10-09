@@ -79,6 +79,25 @@ body {
     margin-right: 8px;
 }
 
+@keyframes rotating {
+    from {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(30deg);
+    }
+    75% {
+        transform: rotate(-30deg);
+    }
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+.loading-like {
+    animation: rotating 2s linear infinite;
+}
+
 .like-button {
     cursor: pointer;
     width: 20px;
@@ -137,4 +156,73 @@ body {
 
 .add-form-button:hover {
     opacity: 0.9;
+}
+
+.hidden {
+    display: none;
+}
+
+.hidden.visible {
+    display: flex;
+}
+
+.comment-form.hidden {
+    display: none;
+}
+
+.comment-form {
+    display: flex;
+}
+
+#registration-form {
+    display: flex;
+    position: fixed;
+    top: 30%;
+    left: 22%;
+    width: 56%;
+    height: 60%;
+    background-color: #814ae7b5;
+    z-index: 1000;
+    overflow: auto;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+.registration-form-wrapper {
+    background-color: #814ae7b5;
+    z-index: 1000;
+    position: fixed;
+    width: 60%;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+.close-button {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    color: #080707;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2000;
+}
+
+.registration-form-wrapper .close-button:hover,
+.registration-form-wrapper .close-button:focus {
+    color: #d6c9c9;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@keyframes animatetop {
+    from {
+        top: -200px;
+        opacity: 0;
+    }
+    to {
+        top: 0;
+        opacity: 1;
+    }
 }

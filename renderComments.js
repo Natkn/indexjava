@@ -1,67 +1,177 @@
+import { savedAuthor } from './index.js'
+import { fetchAndRenderComments } from './fetchAndRenderComments.js'
+import { getToken, login, registration, updateToken, postTodo } from './api.js'
 import { commentsData } from './comments.js'
-import { addLikeEventListeners } from './initList.js'
-import { addCommentClickListeners } from './newComm.js'
+
+function delay(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+    })
+}
 
 export function renderComments() {
     const commentsContainer = document.getElementById('comments-container')
     commentsContainer.innerHTML = ''
+
     commentsData.forEach((comment, index) => {
-        const commentDiv = document.createElement('li')
-        commentDiv.dataset.commentId = index
-        commentDiv.classList.add('comment')
+        const dateString = comment.date
+            ? comment.date.slice(0, 19).replace('T', ' ')
+            : `${new Date().getDate()}.${
+                  new Date().getMonth() + 1
+              }.${new Date().getFullYear()} ${new Date().getHours()}:${new Date().getMinutes()}`
 
-        const commentHeader = document.createElement('div')
-        commentHeader.classList.add('comment-header')
-        const authorDiv = document.createElement('div')
-        authorDiv.textContent = comment.author
-        commentHeader.appendChild(authorDiv)
+        const commentHTML = `
+            <li class="comment" data-comment-id="${index}">
+                <div class="comment-header">
+                    <div>${comment.author ? comment.author : ''}</div>
+                    <div>${dateString}</div>
+                </div>
+                <div class="comment-body">
+                    <div class="comment-text" data-edit-comment-id="${index}">${comment.text}</div>
+                </div>
+                <div class="comment-footer">
+                    <div class="likes">
+                        <span class="likes-counter">${comment.likesCount}</span>
+                        <button class="like-button ${
+                            comment.liked ? 'liked' : ''
+                        }" data-comment-id="${index}"></button>
+                    </div>
+                </div>
+            </li>
+        `
+        commentsContainer.innerHTML += commentHTML
+    })
+    addLikeEventListeners()
+    addCommentClickListeners()
+}
 
-        const dateDiv = document.createElement('div')
-        if (comment.date) {
-            dateDiv.textContent = comment.date
-        } else {
-            const now = new Date()
-            const dateString = `${now.getDate()}.${
-                now.getMonth() + 1
-            }.${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`
-            dateDiv.textContent = dateString
+function addLikeEventListeners() {
+    const likeButtons = document.querySelectorAll('.like-button')
+    likeButtons.forEach((likeButton) => {
+        likeButton.addEventListener('click', () => {
+            const commentId = parseInt(likeButton.dataset.commentId)
+            likeButton.classList.add('loading-like')
+
+            delay(2000)
+                .then(() => {
+                    if (commentsData[commentId].liked === true) {
+                        commentsData[commentId].liked = false
+                        commentsData[commentId].likesCount -= 1
+                    } else {
+                        commentsData[commentId].liked = true
+                        commentsData[commentId].likesCount += 1
+                    }
+                    renderComments()
+                })
+                .finally(() => {
+                    likeButton.classList.remove('loading-like')
+                })
+        })
+    })
+}
+
+function addCommentClickListeners() {
+    const commentTexts = document.querySelectorAll('.comment-text')
+    commentTexts.forEach((commentTextElement) => {
+        commentTextElement.addEventListener('click', () => {})
+    })
+}
+async function sendComment(callback, newTask) {
+    try {
+        if (newTask) {
+            await postTodo({ ...newTask, author: savedAuthor })
         }
-        commentHeader.appendChild(dateDiv)
-        commentDiv.appendChild(commentHeader)
-
-        const commentBody = document.createElement('div')
-        commentBody.classList.add('comment-body')
-        const p = document.createElement('div')
-        p.classList.add('comment-text')
-        p.textContent = comment.text
-        commentBody.appendChild(p)
-        commentDiv.appendChild(commentBody)
-
-        const commentFooter = document.createElement('div')
-        commentFooter.classList.add('comment-footer')
-        const likesDiv = document.createElement('div')
-        likesDiv.classList.add('likes')
-
-        const likeCount = document.createElement('span')
-        likeCount.classList.add('likes-counter')
-        likeCount.textContent = comment.likesCount
-        likesDiv.appendChild(likeCount)
-
-        const likeButton = document.createElement('button')
-        likeButton.classList.add('like-button')
-        if (comment.liked) {
-            likeButton.classList.add('liked')
+        await fetchAndRenderComments()
+        if (callback) {
+            return await callback()
         }
-        likeButton.dataset.commentId = index
+    } catch (error) {
+        alert('Ошибка: ' + error.message)
+    }
+}
+export function showRegistrationForm(callback, newTask) {
+    const app = document.getElementById('app')
+    const registrationModal = document.createElement('div')
+    registrationModal.id = 'registration-form'
+    registrationModal.className = 'registration-form-wrapper'
 
-        likesDiv.appendChild(likeButton)
-        commentFooter.appendChild(likesDiv)
+    registrationModal.innerHTML = `
+        <div id="registration-form">
+            <h1>Страница входа</h1>
+            <div class="form">
+                <h3 class="form-title">Фopмa вxодa</h3>
+                <form id="auth-form">
+                    <div class="form-row">
+                        <input type="text" id="login-input" class="input" placeholder="Login" autocomplete="username">
+                        <input type="password" id="password-input" class="input" placeholder="Пароль" autocomplete="current-password">
+                    </div>
+                </form>
+                <br />
+                <button class="button" id="login-button">Войти</button>
+                <button class="button" id="reg-button">Зарегистрироваться</button>
+            </div>
+        </div> 
+        `
+    const closeButton = document.createElement('span')
+    closeButton.className = 'close-button'
+    closeButton.innerHTML = '&times;'
+    registrationModal.appendChild(closeButton)
 
-        commentDiv.appendChild(commentFooter)
-        commentsContainer.appendChild(commentDiv)
+    closeButton.addEventListener('click', () => {
+        registrationModal.remove()
+    })
+    app.appendChild(registrationModal)
+    const authForm = document.getElementById('auth-form')
+
+    authForm.addEventListener('submit', (event) => {
+        event.preventDefault()
+    })
+    const loginButton = document.getElementById('login-button')
+    const regButton = document.getElementById('reg-button')
+
+    loginButton.addEventListener('click', async () => {
+        const loginValue = document.getElementById('login-input').value
+        const passwordValue = document.getElementById('password-input').value
+        registrationModal.remove()
+        try {
+            const data = await login({
+                login: loginValue,
+                password: passwordValue,
+            })
+
+            if (data.error) {
+                throw new Error(data.error)
+            }
+            await updateToken(data.user.token)
+            console.log('Token after await updateToken in login', getToken())
+            return await sendComment(callback, newTask)
+        } catch (error) {
+            alert('Ошибка входа: ' + error.message)
+        }
     })
 
-    addLikeEventListeners()
+    regButton.addEventListener('click', async () => {
+        const loginValue = document.getElementById('login-input').value
+        const passwordValue = document.getElementById('password-input').value
+        registrationModal.remove()
+        try {
+            const data = await registration({
+                login: loginValue,
+                password: passwordValue,
+            })
 
-    addCommentClickListeners()
+            if (data.error) {
+                throw new Error(data.error)
+            }
+            await updateToken(data.user.token)
+            console.log(
+                'Token after await updateToken in registration',
+                getToken(),
+            )
+            return await sendComment(callback, newTask)
+        } catch (error) {
+            alert('Ошибка регистрации: ' + error.message)
+        }
+    })
+    app.appendChild(registrationModal)
 }

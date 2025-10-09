@@ -1,5 +1,9 @@
-export const commentsData = []
+export let commentsData = []
 export const commentsContainer = document.getElementById('comments-container')
+
+export function updateTasks(newTasks) {
+    commentsData = newTasks
+}
 
 export function getInitialComments() {
     if (commentsContainer) {
